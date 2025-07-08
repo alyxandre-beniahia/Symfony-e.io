@@ -20,10 +20,16 @@ class UserProvider implements UserProviderInterface
 
     public function loadUserByIdentifier(string $identifier): UserInterface
     {
+        // Essayer de trouver par email d'abord
         $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $identifier]);
+        
+        // Si pas trouvé par email, essayer par username
+        if (!$user) {
+            $user = $this->entityManager->getRepository(User::class)->findOneBy(['username' => $identifier]);
+        }
 
         if (!$user) {
-            throw new CustomUserMessageAuthenticationException('Email ou mot de passe incorrect.');
+            throw new CustomUserMessageAuthenticationException('Nom d\'utilisateur/email ou mot de passe incorrect.');
         }
 
         if ($user->getStatus() !== UserStatus::ACTIVE) {
